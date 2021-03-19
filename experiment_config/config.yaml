@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+#Created on Wed Sep  9 15:05:06 2020
+#@author: Nini-Admin
+
+
+run_model: True
+display_results: True
+
+
+debug: False
+solver: 'cbc'
+solver_verbose: False
+
+number_of_teams: 3
+team_names:
+#  - '1'   # 01
+#  - '2'   # 02
+#  - '3'   # 03
+#  - '4'   # 04
+#  - '5'   # 05
+#  - '6'   # 06
+#  - '7'   # 07
+#  - '8'   # 08
+  - 'Moabit'    # 01
+  - 'Kreuzberg' # 02
+  - 'Frohnau'   # 03
+  - 'Adlershof' # 04
+  - 'Wedding'   # 05
+  - 'Tegel'     # 06
+  - 'Pankow'    # 07
+  - 'Treptow'   # 08
+
+# Specific energy system design of each team
+design_parameters_file_name:
+  - 'parameters_Team_01.csv'
+  - 'parameters_Team_02.csv'
+  - 'parameters_Team_03.csv'
+  - 'parameters_Team_04.csv'
+  - 'parameters_Team_05.csv'
+  - 'parameters_Team_06.csv'
+  - 'parameters_Team_07.csv'
+  - 'parameters_Team_08.csv'
+
+
+# Input time series
+# (electrical demand, district heating demand,
+#  irradiation)
+time_series_file_name: 'data_raw_Lehrbeispiel.csv'

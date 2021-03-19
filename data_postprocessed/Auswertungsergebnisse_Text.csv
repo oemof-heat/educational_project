@@ -1,0 +1,56 @@
+Kopfzeile
+Gesamtkosten in Tsd. Euro/a
+CO2-Emissionen_t/a
+Deckungsgrad
+Investitionsgroesse_PV_kW
+dazu benoetigte Flaeche_m2
+Investitionsgroesse_Solarthermie_kW
+dazu benoetigte Flaeche_m2
+Investitionsgroesse_Gaskessel_kW
+Investitionsgroesse_BHKW_kW
+Investitionsgroesse_Waermepumpe_kW
+Investitionsgroesse_Stromspeicher_kWh
+Investitionsgroesse_Waermespeicher_kWh
+Strom
+Gesamtbedarf_Strom_MWh
+Stromueberschuss_MWh
+Gesamtstromerzeugung inkl. WP_MWh
+davon aus PV
+davon aus BHKW
+davon zugekauft
+Waerme
+Gesamtbedarf_Waerme_MWh
+Waermeueberschuss_MWh
+Gesamtwaermeerzeugung_MWh
+davon aus Solarthermie
+davon aus Gaskessel
+davon aus BHKW
+davon aus Waermepumpe
+davon zugekauft
+Einsatz der Speicher
+Stromspeicher Vollzyklen
+Gesamtstrom aus Speicher/Gesamtstrombedarf
+Waermespeicher Vollzyklen
+Gesatmwaerme aus Speicher/Gesamtwaermebedarf
+CO2-Emissionen
+Durch Gaskessel_t/a
+Durch BHKW_t/a
+Durch zugekauften Strom_t/a
+Durch zugekaufte Waerme_t/a
+Kosten
+Anteilige Investitionskosten in Tsd. Euro/a
+davon fuer PV
+davon fuer Solarthermie
+davon fuer Gaskessel
+davon fuer`s BHKW
+davon fuer Waermepumpe
+davon fuer Stromspeicher
+davon fuer Waermespeicher
+Betriebskosten in Tsd. Euro/a
+davon fuer Gaseinkauf
+davon fuer CO2_Emissionen
+davon fuer Stromzukauf
+davon fuer Waermezukauf
+Deckungsgrad
+Autarkie_el
+Autarkie_th

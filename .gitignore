@@ -1,0 +1,12 @@
+# Exclude data format
+*.oemof
+*.png
+*.lp
+
+# Exclude misc
+.idea
+__pycache__
+*/venv/*
+results/
+
+

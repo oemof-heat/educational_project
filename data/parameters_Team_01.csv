@@ -1,0 +1,59 @@
+id;var_name;value;unit;;comment
+1;W_el;400000;kWh;;el. Jahresarbeit
+2;W_th;1800000;kWh;;th. Jahresarbeit
+;;;;;
+3;vc_gas;0.03;Euro/kWh;;spez. Kosten für Erdgas
+4;vc_CO2;0.15;Euro/kWh;;spez. Kosten für CO2-Emissionen
+5;vc_el;0.4;Euro/kWh;;spez. Kosten für Strom aus dem Netz
+6;vc_th;0.3;Euro/kWh;;spez. Kosten für Fernwärme
+;;;;;
+7;capex_PV;800;Euro/kW;;spez. Investitionskosten der Solaranlage
+8;capex_Sol;1000;Euro/kW;;spez. Investitionskosten der Solarthermieanlage
+9;capex_Gaskessel;100;Euro/kW;;spez. Investitionskosten des Gaskessels
+10;capex_BHKW;400;Euro/kW;;spez. Investitionskosten des BHKW
+11;capex_Waermepumpe;900;Euro/kW;;spez. Investitionskosten der Waermepumpe
+12;capex_Stromspeicher;800;Euro/kWh;;spez. Investitionskosten des Stromspeichers
+13;capex_Waermespeicher;20;Euro/kWh;;spez. Investitionskosten des Waermespeichers
+;;;;;
+14;cf_PV;0.15;;;Wirkungsgrad der Solaranlage
+15;cf_Sol;0.7;;;Wirkungsgrad der Solarthermieanlage
+16;cf_Gaskessel;0.9;;;thermischer Wirkungsgrad des Gaskessels
+17;cf_BHKW_el;0.4;;;el. Wirkungsgrad des BHKW
+18;COP_Waermepumpe;3.5;;;Wirkungsgrad der Waermepumpe
+19;cf_Stromspeicher_ein;0.95;;;Einspeicherwirkungsgrad des Stromspeichers
+20;cf_Stromspeicher_aus;1;;;Ausspeicherwirkungsgrad des Stromspeichers
+21;cf_Waermespeicher_ein;1;;;Einspeicherwirkungsgrad des Waermespeichers
+22;cf_Waermespeicher_aus;1;;;Einspeicherwirkungsgrad des Waermespeichers
+;;;;;
+23;A_min_PV;0;m2;;Mindestflaeche der Solaranlage
+24;A_min_Sol;250;m2;;Mindestflaeche der Solarthermieanlage
+25;min_Gaskessel;0;kW;;Mindestgroeße des Gaskessels
+26;max_Gaskessel;inf;kW;;Maximalgroeße des Gaskessels
+27;min_BHKW;0;kW;;Mindestgroeße des BHKW
+28;max_BHKW;inf;kW;;Maximalgroeße des BHKW
+29;min_Waermepumpe;0;kW;;Mindestgroeße der Waermepumpe
+30;max_Waermepumpe;inf;kW;;Maximalgroeße der Waermepumpe
+31;min_Stromspeicher;0;kWh;;Mindestgroeße des Stromspeichers
+32;max_Stromspeicher;inf;kWh;;Maximalgroeße des Stromspeichers
+33;min_Waermespeicher;0;kWh;;Minimalgroeße des Waermespiechers
+34;max_Waermespeicher;inf;kWh;;Maximalgroeße des Waermespeichers
+;;;;;
+35;n_PV;20;Jahre;;Lebenszeit der Solaranlage
+36;n_Sol;20;Jahre;;Lebenszeit der Solarthermieanlage
+37;n_Gaskessel;20;Jahre;;Lebenszeit des Gaskessels
+38;n_BHKW;20;Jahre;;Lebenszeit des BHKW's
+39;n_Waermepumpe;20;Jahre;;Lebenszeit der Waermepumpe
+40;n_Stromspeicher;20;Jahre;;Lebenszeit des Stromspeichers
+41;n_Waermespeicher;20;Jahre;;Lebenszeit des Waermespeichers
+42;wacc;0.04;;;gewichtete durchschnittliche Kapitalkosten
+;;;;;
+43;A_Kollektor_gesamt;2000;m2;;Gesamte maximale Kollektorflaeche für PV und Solarthermie
+;;;;;
+44;lr_Stromspeicher;0;;;Verlustrate Stromspeicher 
+45;isl_Stromspeicher;0.5;;;Anfangsladestand Stromspeicher
+46;lr_Waermespeicher;0.03;;;Verlustrate Waermespeicher
+47;isl_Waermespeicher;0.5;;;Anfangsladestand Waermespeicher
+;;;;;
+48;emission_gas;202;g/kWh;;spez. Emissionen Erdgas
+49;emission_el;537;g/kWh;;spez. Emissionen Strom aus dem Netz
+50;emission_th;280;g/kWh;;spez. Emissionen Fernwaerme
