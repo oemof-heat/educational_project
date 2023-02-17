@@ -8,5 +8,6 @@
 __pycache__
 */venv/*
 results/
+data_postprocessed/
 
 

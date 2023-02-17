@@ -17,10 +17,8 @@ Optional:
 # imports
 ###############################################################################
 
-
 import oemof.solph as solph
-import oemof.outputlib as outputlib
-from oemof.tools import economics as eco
+import oemof.tools.economics as eco
 
 import numpy as np
 import pandas as pd
@@ -54,13 +52,18 @@ def display_results(config_path, team_number):
                               sep=';', encoding = 'unicode_escape')
     param_value = param_df_01['value']
 
+    if cfg['debug']:
+        number_of_time_steps = 3
+    else:
+        number_of_time_steps = 8760
+
     # Laden der Optimierungsergebnisse    
     energysystem = solph.EnergySystem()
     abs_path = os.path.dirname(os.path.abspath(os.path.join(__file__, '..')))
     energysystem.restore(
         dpath=abs_path + "/results",
         filename="model_team_{0}.oemof".format(team_number+1))
-    string_results = outputlib.views.convert_keys_to_strings(
+    string_results = solph.views.convert_keys_to_strings(
         energysystem.results['main'])
     results = energysystem.results['main']
     
@@ -90,37 +93,37 @@ def display_results(config_path, team_number):
     Waermespeicher_in = string_results['Waerme', 'Waermespeicher']['sequences']
     Waermespeicher_out = string_results['Waermespeicher', 'Waerme']['sequences']
     
-    electricity_bus = outputlib.views.node(results, 'Strom')
-    thermal_bus = outputlib.views.node(results, 'Waerme')
+    electricity_bus = solph.views.node(results, 'Strom')
+    thermal_bus = solph.views.node(results, 'Waerme')
     
     
     # ****************************************************************************
     # Größe der Invest-Komponenten
     # ****************************************************************************
     
-    PV_Invest_kW = (outputlib.views.node(results, 'PV')[
+    PV_Invest_kW = (solph.views.node(results, 'PV')[
                 'scalars'][(('PV', 'Strom'), 'invest')])
     
     PV_Invest_m2 = (PV_Invest_kW)/(1*param_value['cf_PV'])
         
-    Solarthermie_Invest_kW = (outputlib.views.node(results, 'Solarthermie')[
+    Solarthermie_Invest_kW = (solph.views.node(results, 'Solarthermie')[
                 'scalars'][(('Solarthermie', 'Waerme'), 'invest')])
 
     Solarthermie_Invest_m2 = (Solarthermie_Invest_kW)/(1*param_value['cf_Sol'])    
         
-    Gaskessel_Invest = (outputlib.views.node(results, 'Gaskessel')[
+    Gaskessel_Invest = (solph.views.node(results, 'Gaskessel')[
                        'scalars'][(('Gaskessel', 'Waerme'), 'invest')])
     
-    BHKW_Invest = (outputlib.views.node(results, 'BHKW')[
+    BHKW_Invest = (solph.views.node(results, 'BHKW')[
             'scalars'][(('BHKW', 'Waerme'), 'invest')])
     
-    Waermepumpe_Invest = (outputlib.views.node(results, 'Waermepumpe')[
+    Waermepumpe_Invest = (solph.views.node(results, 'Waermepumpe')[
             'scalars'][(('Waermepumpe', 'Waerme'), 'invest')])
     
-    Stromspeicher_Invest = (outputlib.views.node(results, 'Stromspeicher')[
+    Stromspeicher_Invest = (solph.views.node(results, 'Stromspeicher')[
             'scalars'][(('Stromspeicher', 'None'), 'invest')])
     
-    Waermespeicher_Invest = (outputlib.views.node(results, 'Waermespeicher')[
+    Waermespeicher_Invest = (solph.views.node(results, 'Waermespeicher')[
             'scalars'][(('Waermespeicher', 'None'), 'invest')])
     
     print("Die Größe der PV-Anlage beträgt:  {:.2f}"
@@ -363,23 +366,25 @@ def display_results(config_path, team_number):
     
     # Jahreszeitreihe Strom
     zeitreihen_el = pd.DataFrame()
-    if sum(shortage_electricity.flow) > 0.1:
-        zeitreihen_el['Strombezug'] = shortage_electricity.flow
-    if sum(PV_el.flow) > 0.1:
-        zeitreihen_el['PV'] = PV_el.flow
-    if sum(BHKW_el.flow) > 0.1:
-        zeitreihen_el['BHKW_el'] = BHKW_el.flow
-    if sum(Stromspeicher_out.flow) > 0.1:
-        zeitreihen_el['Stromspeicher_out'] = abs(Stromspeicher_out.flow)
-    if sum(el_demand.flow) > 0.1:
-        zeitreihen_el['Strombedarf'] = el_demand.flow*(-1)
-    if sum(Ueberschuss_el.flow) > 0.1:
-        zeitreihen_el['Stromueberschuss'] = Ueberschuss_el.flow*(-1)
-    if sum(Waermepumpe_el.flow) > 0.1:
-        zeitreihen_el['Waermepumpe_el'] = Waermepumpe_el.flow*(-1)
-    if sum(Stromspeicher_in.flow) > 0.1:
-        zeitreihen_el['Stromspeicher_in'] = abs(Stromspeicher_in.flow)*(-1)
-        
+    if sum(shortage_electricity.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_el['Strombezug'] = shortage_electricity.flow[0:number_of_time_steps]
+    if sum(PV_el.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_el['PV'] = PV_el.flow[0:number_of_time_steps]
+    if sum(BHKW_el.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_el['BHKW_el'] = BHKW_el.flow[0:number_of_time_steps]
+    if sum(Stromspeicher_out.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_el['Stromspeicher_out'] = abs(Stromspeicher_out.flow[0:number_of_time_steps])
+    if sum(el_demand.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_el['Strombedarf'] = el_demand.flow[0:number_of_time_steps]*(-1)
+    if sum(Ueberschuss_el.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_el['Stromueberschuss'] = Ueberschuss_el.flow[0:number_of_time_steps]*(-1)
+    if sum(Waermepumpe_el.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_el['Waermepumpe_el'] = Waermepumpe_el.flow[0:number_of_time_steps]*(-1)
+    if sum(Stromspeicher_in.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_el['Stromspeicher_in'] = abs(Stromspeicher_in.flow[0:number_of_time_steps])*(-1)
+
+    #print(zeitreihen_el)
+
     zeitreihen_el_sortiert=zeitreihen_el.reindex(zeitreihen_el.abs().sum().sort_values(ascending=False).index, axis=1)
     zeitreihen_el_sortiert.to_csv('../data_postprocessed/data_postprocessed_{0}/Zeitreihe_el_{0}.csv'.format(team_number+1))
     
@@ -403,7 +408,8 @@ def display_results(config_path, team_number):
     if sum(Stromspeicher_in.flow[144:312]) > 0.1:
         zeitreihen_el_Winter['Stromspeicher_in'] = abs(Stromspeicher_in.flow[144:312])*(-1)
     
-    
+    #print(zeitreihen_el_Winter)
+
     zeitreihen_el_Winter_sortiert=zeitreihen_el_Winter.reindex(zeitreihen_el_Winter.abs().sum().sort_values(ascending=False).index, axis=1)    
     zeitreihen_el_Winter_sortiert.to_csv('../data_postprocessed/data_postprocessed_{0}/Zeitreihe_el_Winter_{0}.csv'.format(team_number+1))    
     
@@ -479,24 +485,24 @@ def display_results(config_path, team_number):
     
     # Jahreszeitreihe Waerme
     zeitreihen_th = pd.DataFrame()
-    if sum(shortage_heat.flow) > 0.1:
-        zeitreihen_th['Waermebezug'] = shortage_heat.flow
-    if sum(Sol_th.flow) > 0.1:
-        zeitreihen_th['Solarthermie'] = Sol_th.flow
-    if sum(Gaskessel_th.flow) > 0.1:
-        zeitreihen_th['Gaskessel'] = Gaskessel_th.flow
-    if sum(BHKW_th.flow) > 0.1:
-        zeitreihen_th['BHKW_th'] = BHKW_th.flow
-    if sum(Waermepumpe_th.flow) > 0.1:
-        zeitreihen_th['Waermepumpe_th'] = Waermepumpe_th.flow
-    if sum(Waermespeicher_out.flow) > 0.1:
-        zeitreihen_th['Waermespeicher_out'] = abs(Waermespeicher_out.flow)
-    if sum(heat_demand.flow) > 0.1:
-        zeitreihen_th['Waermebedarf'] = heat_demand.flow*(-1)
-    if sum(Ueberschuss_th.flow) > 0.1:
-        zeitreihen_th['Waermeueberschuss'] = Ueberschuss_th.flow*(-1)
-    if sum(Waermespeicher_in.flow) > 0.1:
-        zeitreihen_th['Waermespeicher_in'] = abs(Waermespeicher_in.flow)*(-1)
+    if sum(shortage_heat.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_th['Waermebezug'] = shortage_heat.flow[0:number_of_time_steps]
+    if sum(Sol_th.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_th['Solarthermie'] = Sol_th.flow[0:number_of_time_steps]
+    if sum(Gaskessel_th.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_th['Gaskessel'] = Gaskessel_th.flow[0:number_of_time_steps]
+    if sum(BHKW_th.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_th['BHKW_th'] = BHKW_th.flow[0:number_of_time_steps]
+    if sum(Waermepumpe_th.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_th['Waermepumpe_th'] = Waermepumpe_th.flow[0:number_of_time_steps]
+    if sum(Waermespeicher_out.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_th['Waermespeicher_out'] = abs(Waermespeicher_out.flow[0:number_of_time_steps])
+    if sum(heat_demand.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_th['Waermebedarf'] = heat_demand.flow[0:number_of_time_steps]*(-1)
+    if sum(Ueberschuss_th.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_th['Waermeueberschuss'] = Ueberschuss_th.flow[0:number_of_time_steps]*(-1)
+    if sum(Waermespeicher_in.flow[0:number_of_time_steps]) > 0.1:
+        zeitreihen_th['Waermespeicher_in'] = abs(Waermespeicher_in.flow[0:number_of_time_steps])*(-1)
     
     zeitreihen_th_sortiert=zeitreihen_th.reindex(zeitreihen_th.abs().sum().sort_values(ascending=False).index, axis=1)
     zeitreihen_th_sortiert.to_csv('../data_postprocessed/data_postprocessed_{0}/Zeitreihe_th_{0}.csv'.format(team_number+1))

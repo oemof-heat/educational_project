@@ -3,12 +3,7 @@
 """
 Installation requirements
 -------------------------
-
-This example requires the version v0.3.2 of oemof. Install by:
-
-Optional:
-
-    pip install matplotlib
+This example requires the version v0.5 of oemof. 
 
 """
 
@@ -21,14 +16,24 @@ Optional:
 ###############################################################################
 
 # Default logger of oemof
-from oemof.tools import logger
-from oemof.tools import helpers
-
 import oemof.solph as solph
-import oemof.outputlib as outputlib
-from oemof.tools import economics
-import pyomo.environ as po
+from oemof.solph import helpers
+from oemof.tools import logger
 
+import oemof.tools.economics as economics
+
+from oemof.solph import EnergySystem
+from oemof.solph import Model
+from oemof.solph import buses
+from oemof.solph import components as cmp
+from oemof.solph import create_time_index
+from oemof.solph import flows
+from oemof.solph import helpers
+from oemof.solph import processing
+from oemof.solph import views
+
+
+import pyomo.environ as po
 import logging
 import os
 import pandas as pd
@@ -58,7 +63,7 @@ def run_model(config_path, team_number):
     logger.define_logging(logfile='model_team_{0}.log'.format(team_number+1),
                           screen_level=logging.INFO,
                           file_level=logging.DEBUG)
-
+    logging.getLogger().setLevel(logging.INFO)
 
     logging.info('Initialize the energy system')
     date_time_index = pd.date_range('1/1/2019', periods=number_of_time_steps,
@@ -136,12 +141,12 @@ def run_model(config_path, team_number):
     ### Definition des Ueberschusses #########################################
     
     # Senke fuer Stromueberschusss
-    energysystem.add(solph.Sink(
+    energysystem.add(cmp.Sink(
             label='excess_bel',
             inputs={b_el: solph.Flow()}))
     
     # Senke fuer Waermeueberschuss
-    energysystem.add(solph.Sink(
+    energysystem.add(cmp.Sink(
             label='excess_bth',
             inputs={b_th: solph.Flow()}))
     
@@ -149,47 +154,48 @@ def run_model(config_path, team_number):
     ### Definition Quellen #################################################
     
     # Quelle: Erdgasnetz
-    energysystem.add(solph.Source(
+    energysystem.add(cmp.Source(
             label='Gasnetz',
             outputs={b_gas: solph.Flow(
             variable_costs=param_value['vc_gas']
                             +param_value['vc_CO2'])})) #[€/kWh]
     
     # Quelle: Stromnetz
-    energysystem.add(solph.Source(
+    energysystem.add(cmp.Source(
             label='Strombezug',
             outputs={b_el: solph.Flow(
             variable_costs=param_value['vc_el'])})) #[€/kWh]
     
     # Quelle: Waermenetz/Fernwaerme
-    energysystem.add(solph.Source(
+    energysystem.add(cmp.Source(
             label='Waermebezug',
             outputs={b_th: solph.Flow(
             variable_costs=param_value['vc_th'])})) #[€/kWh]
     
     # Quelle: Solaranlage
     if param_value['A_Kollektor_gesamt'] > 0:    
-        energysystem.add(solph.Source(
+        energysystem.add(cmp.Source(
                 label='PV',
-                outputs={b_el:solph.Flow(
-                        actual_value=(data['Sol_irradiation [Wh/sqm]']*0.001
+                outputs={b_el: flows.Flow(
+                        fix=(data['Sol_irradiation [Wh/sqm]']*0.001
                                       *param_value['cf_PV']),         #[kWh/m²]
-                        fixed=True,
                         investment=solph.Investment(
                         ep_costs=epc_PV,
-                        minimum=param_value['A_min_PV']*1*param_value['cf_PV']
+                        minimum=param_value['A_min_PV']*1*param_value['cf_PV'],
+#                        space = 2.0
                         ))}))
-                        
+
+                       
     # Quelle: Solarthermieanlage
     if param_value['A_Kollektor_gesamt'] > 0:    
-        energysystem.add(solph.Source(
+        energysystem.add(cmp.Source(
                 label='Solarthermie',
-                outputs={b_th:solph.Flow(
-                        actual_value=(data['Sol_irradiation [Wh/sqm]']*0.001
+                outputs={b_th: flows.Flow(
+                        fix=(data['Sol_irradiation [Wh/sqm]']*0.001
                                       *param_value['cf_Sol']),  #[kWh/m²]
-                        fixed=True,
                         investment=solph.Investment(
                         ep_costs=epc_Solarthermie,
+#                        space = 1 / param_value['cf_Sol'],
                         minimum=param_value['A_min_Sol']*1*param_value['cf_Sol']
                         ))}))
         
@@ -197,30 +203,30 @@ def run_model(config_path, team_number):
     ### Definition Bedarf ################################################
       
     # Strombedarf
-    energysystem.add(solph.Sink(
+    energysystem.add(cmp.Sink(
             label='Strombedarf',
             inputs={b_el: solph.Flow(
-                actual_value=data['P*'],
-                nominal_value=param_value['W_el'], #[kWh]
-                fixed=True)}))
+                fix=data['P*'],
+                nominal_value=param_value['W_el'] #[kWh]
+                )}))
      
     # Waermebedarf
-    energysystem.add(solph.Sink(
+    energysystem.add(cmp.Sink(
             label='Waermebedarf',
             inputs={b_th: solph.Flow(
-                actual_value=data['Q*'],
-                nominal_value=param_value['W_th'], #[kWh]
-                fixed=True)}))     
+                fix=data['Q*'],
+                nominal_value=param_value['W_th'] #[kWh]
+                )}))     
         
         
     ### Definition Systemkomponenten #########################################
     
     # Transformer: Gaskessel
     if param_value['max_Gaskessel'] > 0:
-        energysystem.add(solph.Transformer(
+        energysystem.add(cmp.Transformer(
                 label="Gaskessel",
-                inputs={b_gas: solph.Flow()},
-                outputs={b_th: solph.Flow(investment=solph.Investment(
+                inputs={b_gas: flows.Flow()},
+                outputs={b_th: flows.Flow(investment=solph.Investment(
                                   ep_costs=epc_gas_boiler,
                                   minimum=param_value['min_Gaskessel'],    #[kW]
                                   maximum=param_value['max_Gaskessel']))}, #[kW]
@@ -228,10 +234,10 @@ def run_model(config_path, team_number):
     
     # Transformer: BHKW
     if param_value['max_BHKW'] > 0:
-        energysystem.add(solph.Transformer(
+        energysystem.add(cmp.Transformer(
                 label="BHKW",
-                inputs={b_gas: solph.Flow()},
-                outputs={b_el: solph.Flow(),
+                inputs={b_gas: flows.Flow()},
+                outputs={b_el: flows.Flow(),
                          b_th:solph.Flow(investment=solph.Investment(
                                  ep_costs=epc_BHKW,
                                  minimum=param_value['min_BHKW'],          #[kW]
@@ -241,10 +247,10 @@ def run_model(config_path, team_number):
     
     # Transformer: Waermepumpe
     if param_value['max_Waermepumpe'] > 0:
-        energysystem.add(solph.Transformer(
+        energysystem.add(cmp.Transformer(
                 label="Waermepumpe",
-                inputs={b_el: solph.Flow()},
-                outputs={b_th: solph.Flow(investment=solph.Investment(
+                inputs={b_el: flows.Flow()},
+                outputs={b_th: flows.Flow(investment=solph.Investment(
                                   ep_costs=epc_heat_pump,
                                   minimum=param_value['min_Waermepumpe'],    #[kW]
                                   maximum=param_value['max_Waermepumpe']))}, #[kW]
@@ -292,14 +298,16 @@ def run_model(config_path, team_number):
     # Constraint fuer Kollektorgesamtflaeche
     ##########################################################################
     
-    PV_installed = energysystem.groups['PV']
-    Sol_installed = energysystem.groups['Solarthermie']
-    
-    myconstrains = po.Block()
-    model.add_component('MyBlock', myconstrains)
-    myconstrains.collector_area = po.Constraint(
-            expr=((((model.InvestmentFlow.invest[PV_installed, b_el])/(1*param_value['cf_PV']))
-            + ((model.InvestmentFlow.invest[Sol_installed, b_th])/(1*param_value['cf_Sol']))) <= param_value['A_Kollektor_gesamt']))
+    model = solph.constraints.additional_investment_flow_limit (model, "space",
+            limit = 24.0 )
+
+    #PV_installed = energysystem.groups['PV']
+    #Sol_installed = energysystem.groups['Solarthermie']
+    #myconstrains = po.Block()
+    #model.add_component('MyBlock', myconstrains)
+    # myconstrains.collector_area = po.Constraint(
+    #         expr=((((model.InvestmentFlow.invest[PV_installed, b_el])/(1*param_value['cf_PV']))
+    #         + ((model.InvestmentFlow.invest[Sol_installed, b_th])/(1*param_value['cf_Sol']))) <= param_value['A_Kollektor_gesamt']))
         
     
     ##########################################################################
@@ -318,8 +326,8 @@ def run_model(config_path, team_number):
     logging.info('Store the energy system with the results.')
     
     # add results to the energy system to make it possible to store them.
-    energysystem.results['main'] = outputlib.processing.results(model)
-    energysystem.results['meta'] = outputlib.processing.meta_results(model)
+    energysystem.results['main'] = solph.processing.results(model)
+    energysystem.results['meta'] = solph.processing.meta_results(model)
     results = energysystem.results['main']
     
     
