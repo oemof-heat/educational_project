@@ -1,0 +1,1 @@
+Subfolder containing calculation results.
