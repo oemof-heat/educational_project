@@ -21,12 +21,11 @@ Optional:
 ###############################################################################
 
 # Default logger of oemof
-from oemof.tools import logger
-from oemof.tools import helpers
-
 import oemof.solph as solph
-import oemof.outputlib as outputlib
-from oemof.tools import economics
+from oemof.solph import helpers
+from oemof.tools import logger
+import oemof.tools.economics as economics
+
 import pyomo.environ as po
 
 import logging
@@ -172,9 +171,8 @@ def run_model(config_path, team_number):
         energysystem.add(solph.Source(
                 label='PV',
                 outputs={b_el:solph.Flow(
-                        actual_value=(data['Sol_irradiation [Wh/sqm]']*0.001
+                        fix=(data['Sol_irradiation [Wh/sqm]']*0.001
                                       *param_value['cf_PV']),         #[kWh/m²]
-                        fixed=True,
                         investment=solph.Investment(
                         ep_costs=epc_PV,
                         minimum=param_value['A_min_PV']*1*param_value['cf_PV']
@@ -185,9 +183,8 @@ def run_model(config_path, team_number):
         energysystem.add(solph.Source(
                 label='Solarthermie',
                 outputs={b_th:solph.Flow(
-                        actual_value=(data['Sol_irradiation [Wh/sqm]']*0.001
+                        fix=(data['Sol_irradiation [Wh/sqm]']*0.001
                                       *param_value['cf_Sol']),  #[kWh/m²]
-                        fixed=True,
                         investment=solph.Investment(
                         ep_costs=epc_Solarthermie,
                         minimum=param_value['A_min_Sol']*1*param_value['cf_Sol']
@@ -200,17 +197,17 @@ def run_model(config_path, team_number):
     energysystem.add(solph.Sink(
             label='Strombedarf',
             inputs={b_el: solph.Flow(
-                actual_value=data['P*'],
+                fix=data['P*'],
                 nominal_value=param_value['W_el'], #[kWh]
-                fixed=True)}))
+                )}))
      
     # Waermebedarf
     energysystem.add(solph.Sink(
             label='Waermebedarf',
             inputs={b_th: solph.Flow(
-                actual_value=data['Q*'],
+                fix=data['Q*'],
                 nominal_value=param_value['W_th'], #[kWh]
-                fixed=True)}))     
+                )}))     
         
         
     ### Definition Systemkomponenten #########################################
@@ -318,8 +315,8 @@ def run_model(config_path, team_number):
     logging.info('Store the energy system with the results.')
     
     # add results to the energy system to make it possible to store them.
-    energysystem.results['main'] = outputlib.processing.results(model)
-    energysystem.results['meta'] = outputlib.processing.meta_results(model)
+    energysystem.results['main'] = solph.processing.results(model)
+    energysystem.results['meta'] = solph.processing.meta_results(model)
     results = energysystem.results['main']
     
     
