@@ -6,10 +6,15 @@ This repository contains material for the illustration of energy system analysis
 This repository includes the subdirectories with the following contents:
 
 data: all data to define the given parameters for each team/scenario
-data_postprocessed: Auswertungsergebnisse_Text.csv = List of parameter names which is used to generate files in the subfolders: subfolders with results for each team/scenario 
+
+data_postprocessed: Auswertungsergebnisse_Text.csv = List of parameter names which is used to generate files in the subfolders: subfolders with results for each team/scenario
+
 data_raw: time series data for solar irradiation, electric and thermal power demand
+
 experiment_config: file to control the calculation process
+
 results: calculation results
+
 src: python sources
 
 # Installation
